@@ -10,6 +10,7 @@ public class ParseApplication extends Application {
         public void onCreate() {
             super.onCreate();
 
+
             Parse.initialize(new Parse.Configuration.Builder(this)
                     .applicationId("Jtc2Ce54LAlkj7BRtp80vVEywnMaeHpwoLSiuz8T")
                     .clientKey("qc0QlWTDT6GtELA3uZUv5sAmEKirYQdVtm1Tv7hI")
