@@ -19,6 +19,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class LogIn1 extends AppCompatActivity {
+
+    public static final String TAG = "LogIn1";
     EditText etEmail, etPassword;
     Button btnLoginReg;
     TextView etCreateBtn;
