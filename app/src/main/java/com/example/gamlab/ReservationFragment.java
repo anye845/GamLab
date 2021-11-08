@@ -19,6 +19,8 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.gamlab.database.DAOSchedule;
+import com.example.gamlab.database.schedule;
 import com.google.android.material.timepicker.TimeFormat;
 
 import org.w3c.dom.Text;
@@ -28,7 +30,7 @@ import java.util.Calendar;
 
 public class ReservationFragment extends Fragment {
 
-    private Button btnDate, btnTime;
+    private Button btnDate, btnTime, btnReserve;
     private TextView tvDate, tvTime;
 
     @Nullable
@@ -38,6 +40,7 @@ public class ReservationFragment extends Fragment {
 
         btnDate = view.findViewById(R.id.btnDate);
         btnTime = view.findViewById(R.id.btnTime);
+        btnReserve = view.findViewById(R.id.btnReserve);
         tvDate = view.findViewById(R.id.tvDate);
         tvTime = view.findViewById(R.id.tvTime);
 
@@ -52,6 +55,19 @@ public class ReservationFragment extends Fragment {
             public void onClick(View v) {
                 handleBtnTime();
             }
+        });
+
+        DAOSchedule dao = new DAOSchedule();
+        btnReserve.setOnClickListener(v ->
+        {
+            schedule s = new schedule(tvTime.getText().toString(), tvDate.getText().toString());
+            dao.add(s).addOnSuccessListener(suc->
+            {
+                Toast.makeText(getActivity(), "Success!!", Toast.LENGTH_SHORT).show();
+            }).addOnFailureListener(er->
+            {
+                Toast.makeText(getActivity(), ""+er.getMessage(), Toast.LENGTH_SHORT).show();
+            });
         });
 
 

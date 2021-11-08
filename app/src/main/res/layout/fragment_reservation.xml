@@ -10,7 +10,7 @@
         android:layout_below="@+id/textView2"
         android:layout_marginTop="50dp"
         android:gravity="center"
-        android:text="TextView"
+        android:text="MM/DD/YYYY"
         android:textSize="36sp" />
 
     <TextView
@@ -42,7 +42,7 @@
         android:layout_below="@+id/btnDate"
         android:layout_marginTop="50dp"
         android:gravity="center"
-        android:text="TextView"
+        android:text="HH/MM"
         android:textSize="36sp" />
 
     <Button
@@ -58,7 +58,7 @@
         android:text="Get Time" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/btnReserve"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/btnTime"
@@ -68,4 +68,5 @@
         android:layout_marginTop="40dp"
         android:layout_marginEnd="110dp"
         android:text="Make reservation" />
+
 </RelativeLayout>
