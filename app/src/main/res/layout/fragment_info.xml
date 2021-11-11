@@ -43,11 +43,13 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="400dp"
+        android:layout_height="285dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="23dp"
-        tools:src="@drawable/ic_lounge_background" />
+        android:layout_marginTop="7dp"
+        app:srcCompat="@drawable/ic_lounge_background"
+        tools:src="@drawable/ic_lounge_background"
+        tools:srcCompat="@drawable/ic_lounge_background" />
 
 </RelativeLayout>
