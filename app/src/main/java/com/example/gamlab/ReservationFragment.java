@@ -29,8 +29,8 @@ import devs.mulham.horizontalcalendar.utils.HorizontalCalendarListener;
 
 public class ReservationFragment extends Fragment {
 
-    RecyclerView rvTimeSlot;
-    FirebaseFirestore fb;
+    private RecyclerView rvTimeSlot;
+    private FirebaseFirestore fb;
     private FirestoreRecyclerAdapter adapter;
 
 
@@ -62,7 +62,8 @@ public class ReservationFragment extends Fragment {
 
 
         Query query = fb.getInstance()
-                .collection("Time");
+                .collection("Time")
+                .orderBy("", Query.Direction.valueOf("desc"));
         FirestoreRecyclerOptions<TimeSlots> options = new FirestoreRecyclerOptions.Builder<TimeSlots>()
                 .setQuery(query, TimeSlots.class)
                 .build();

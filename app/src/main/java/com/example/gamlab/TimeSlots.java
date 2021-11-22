@@ -4,9 +4,9 @@ public class TimeSlots {
     private String time;
 
 
-    public TimeSlots(){}
+    private TimeSlots(){}
 
-    public TimeSlots(String time) {
+    private TimeSlots(String time) {
         this.time = time;
     }
 
