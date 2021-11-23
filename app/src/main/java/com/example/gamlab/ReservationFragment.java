@@ -1,5 +1,7 @@
 package com.example.gamlab;
 
+import static com.example.gamlab.MainActivity.TAG;
+
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -17,11 +19,24 @@ import android.widget.TextView;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Calendar;
+import java.text.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import devs.mulham.horizontalcalendar.HorizontalCalendar;
 import devs.mulham.horizontalcalendar.utils.HorizontalCalendarListener;
@@ -32,7 +47,7 @@ public class ReservationFragment extends Fragment {
     private RecyclerView rvTimeSlot;
     private FirebaseFirestore fb;
     private FirestoreRecyclerAdapter adapter;
-
+    private FirebaseAuth mAuth;
 
     @Nullable
     @Override
@@ -44,7 +59,7 @@ public class ReservationFragment extends Fragment {
         startDate.add(Calendar.MONTH, 0);
 
         Calendar endDate = Calendar.getInstance();
-        endDate.add(Calendar.MONTH, 3);
+        endDate.add(Calendar.MONTH, 2);
 
         HorizontalCalendar horizontalCalendar = new HorizontalCalendar.Builder(view, R.id.calendarView)
                 .range(startDate, endDate)
@@ -53,17 +68,46 @@ public class ReservationFragment extends Fragment {
         horizontalCalendar.setCalendarListener(new HorizontalCalendarListener() {
             @Override
             public void onDateSelected(Calendar date, int position) {
-                Log.e("TAG", "CURRENT DATE IS" + date);
+                Log.e("TAG", "CURRENT DATE IS " + date.DAY_OF_MONTH + date.MONTH);
+                Calendar cal = horizontalCalendar.getDateAt(position);
+
+                //formatting date
+                cal.add(Calendar.DATE,1);
+                SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
+                String formatted = format1.format(cal.getTime());
+                Log.d("Selected Date", formatted);
+
+                //getting users information
+                mAuth = FirebaseAuth.getInstance();
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+                //adding date to the collection
+                Map<String, Object> dates = new HashMap<>();
+                dates.put("date", formatted);
+                fb.collection("users/" + currentUser.getUid() + "/reservations")
+                        .add(dates)
+                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "Error adding document", e);
+                            }
+                        });
             }
         });
+
 
         fb = FirebaseFirestore.getInstance();
         rvTimeSlot = view.findViewById(R.id.rvTimeSlot);
 
 
+
         Query query = fb.getInstance()
-                .collection("Time")
-                .orderBy("", Query.Direction.valueOf("desc"));
+                .collection("Time");
         FirestoreRecyclerOptions<TimeSlots> options = new FirestoreRecyclerOptions.Builder<TimeSlots>()
                 .setQuery(query, TimeSlots.class)
                 .build();
