@@ -16,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
@@ -72,8 +73,8 @@ public class ReservationFragment extends Fragment {
                 Calendar cal = horizontalCalendar.getDateAt(position);
 
                 //formatting date
-                cal.add(Calendar.DATE,1);
-                SimpleDateFormat format1 = new SimpleDateFormat("dd/MM/yyyy");
+//                cal.add(Calendar.DATE,1);
+                SimpleDateFormat format1 = new SimpleDateFormat("MM/dd/yyyy");
                 String formatted = format1.format(cal.getTime());
                 Log.d("Selected Date", formatted);
 
@@ -83,6 +84,7 @@ public class ReservationFragment extends Fragment {
                 //adding date to the collection
                 Map<String, Object> dates = new HashMap<>();
                 dates.put("date", formatted);
+                Log.d(TAG, "get uID:" + currentUser.getUid());
                 fb.collection("users/" + currentUser.getUid() + "/reservations")
                         .add(dates)
                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
@@ -150,6 +152,15 @@ public class ReservationFragment extends Fragment {
             super(itemView);
 
             tvItem = itemView.findViewById(R.id.tvItem);
+
+            //action when the user select the item
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getContext(), "time picked", Toast.LENGTH_SHORT).show();
+
+                }
+            });
         }
     }
 
