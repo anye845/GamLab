@@ -107,7 +107,6 @@ public class ReservationFragment extends Fragment {
         rvTimeSlot = view.findViewById(R.id.rvTimeSlot);
 
 
-
         Query query = fb.getInstance()
                 .collection("Time");
         FirestoreRecyclerOptions<TimeSlots> options = new FirestoreRecyclerOptions.Builder<TimeSlots>()
@@ -144,7 +143,7 @@ public class ReservationFragment extends Fragment {
     private void setContentView(int fragment_reservation) {
     }
 
-    private class TimeSlotsViewHolder extends RecyclerView.ViewHolder{
+    private class TimeSlotsViewHolder extends RecyclerView.ViewHolder {
 
         private TextView tvItem;
 
@@ -165,17 +164,20 @@ public class ReservationFragment extends Fragment {
     }
 
     @Override
-    public void onStop(){
+    public void onStop() {
         super.onStop();
-        adapter.stopListening();;
+        adapter.stopListening();
+        ;
     }
 
 
     @Override
-    public void onStart(){
+    public void onStart() {
         super.onStart();
-        adapter.startListening();;
+        adapter.startListening();
+        ;
     }
+}
 
 
 
