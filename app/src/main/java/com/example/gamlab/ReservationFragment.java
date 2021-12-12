@@ -1,130 +1,181 @@
 package com.example.gamlab;
 
-import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
+import static com.example.gamlab.MainActivity.TAG;
+
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import android.text.format.DateFormat;
+import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.example.gamlab.database.DAOSchedule;
-import com.example.gamlab.database.schedule;
-import com.google.android.material.timepicker.TimeFormat;
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
-import org.w3c.dom.Text;
-
-import java.nio.BufferUnderflowException;
 import java.util.Calendar;
+import java.text.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import devs.mulham.horizontalcalendar.HorizontalCalendar;
+import devs.mulham.horizontalcalendar.utils.HorizontalCalendarListener;
+
 
 public class ReservationFragment extends Fragment {
 
-    private Button btnDate, btnTime, btnReserve;
-    private TextView tvDate, tvTime;
+    private RecyclerView rvTimeSlot;
+    private FirebaseFirestore fb;
+    private FirestoreRecyclerAdapter adapter;
+    private FirebaseAuth mAuth;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_reservation, container, false);
+        setContentView(R.layout.fragment_reservation);
 
-        btnDate = view.findViewById(R.id.btnDate);
-        btnTime = view.findViewById(R.id.btnTime);
-        btnReserve = view.findViewById(R.id.btnReserve);
-        tvDate = view.findViewById(R.id.tvDate);
-        tvTime = view.findViewById(R.id.tvTime);
+        Calendar startDate = Calendar.getInstance();
+        startDate.add(Calendar.MONTH, 0);
 
-        btnDate.setOnClickListener(new View.OnClickListener() {
+        Calendar endDate = Calendar.getInstance();
+        endDate.add(Calendar.MONTH, 2);
+
+        HorizontalCalendar horizontalCalendar = new HorizontalCalendar.Builder(view, R.id.calendarView)
+                .range(startDate, endDate)
+                .datesNumberOnScreen(7)
+                .build();
+        horizontalCalendar.setCalendarListener(new HorizontalCalendarListener() {
             @Override
-            public void onClick(View v) {
-                handleBtnDate();
+            public void onDateSelected(Calendar date, int position) {
+                Log.e("TAG", "CURRENT DATE IS " + date.DAY_OF_MONTH + date.MONTH);
+                Calendar cal = horizontalCalendar.getDateAt(position);
+
+                //formatting date
+//                cal.add(Calendar.DATE,1);
+                SimpleDateFormat format1 = new SimpleDateFormat("MM/dd/yyyy");
+                String formatted = format1.format(cal.getTime());
+                Log.d("Selected Date", formatted);
+
+                //getting users information
+                mAuth = FirebaseAuth.getInstance();
+                FirebaseUser currentUser = mAuth.getCurrentUser();
+                //adding date to the collection
+                Map<String, Object> dates = new HashMap<>();
+                dates.put("date", formatted);
+                Log.d(TAG, "get uID:" + currentUser.getUid());
+                fb.collection("users/" + currentUser.getUid() + "/reservations")
+                        .add(dates)
+                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w(TAG, "Error adding document", e);
+                            }
+                        });
             }
         });
-        btnTime.setOnClickListener(new View.OnClickListener() {
+
+
+        fb = FirebaseFirestore.getInstance();
+        rvTimeSlot = view.findViewById(R.id.rvTimeSlot);
+
+
+
+        Query query = fb.getInstance()
+                .collection("Time");
+        FirestoreRecyclerOptions<TimeSlots> options = new FirestoreRecyclerOptions.Builder<TimeSlots>()
+                .setQuery(query, TimeSlots.class)
+                .build();
+
+        adapter = new FirestoreRecyclerAdapter<TimeSlots, TimeSlotsViewHolder>(options) {
+            @NonNull
             @Override
-            public void onClick(View v) {
-                handleBtnTime();
+            public TimeSlotsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_slot, parent, false);
+                return new TimeSlotsViewHolder(view);
             }
-        });
 
-        DAOSchedule dao = new DAOSchedule();
-        btnReserve.setOnClickListener(v ->
-        {
-            schedule s = new schedule(tvTime.getText().toString(), tvDate.getText().toString());
-            dao.add(s).addOnSuccessListener(suc->
-            {
-                Toast.makeText(getActivity(), "Success!!", Toast.LENGTH_SHORT).show();
-            }).addOnFailureListener(er->
-            {
-                Toast.makeText(getActivity(), ""+er.getMessage(), Toast.LENGTH_SHORT).show();
-            });
-        });
+            @Override
+            protected void onBindViewHolder(@NonNull TimeSlotsViewHolder holder, int position, @NonNull TimeSlots model) {
+                holder.tvItem.setText(model.getTime());
+            }
+        };
 
+        rvTimeSlot.setHasFixedSize(true);
+        rvTimeSlot.setLayoutManager(new LinearLayoutManager(getActivity()));
+        rvTimeSlot.setAdapter(adapter);
 
         return view;
     }
 
-    private void handleBtnDate(){
-
-        Calendar calendar = Calendar.getInstance();
-
-        int YEAR = calendar.get(calendar.YEAR);
-        int MONTH = calendar.get(calendar.MONTH);
-        int DATE = calendar.get(calendar.DATE);
-
-        DatePickerDialog datePickDialog = new DatePickerDialog(getActivity(), new DatePickerDialog.OnDateSetListener() {
-            @Override
-            public void onDateSet(DatePicker view, int year, int month, int date) {
-                String dateString = year + " " + month + " " + date;
-                tvDate.setText(dateString);
-
-                Calendar calendar1 = Calendar.getInstance();
-                calendar1.set(Calendar.YEAR, year);
-                calendar1.set(Calendar.MONTH, month);
-                calendar1.set(Calendar.DATE,date);
-
-                CharSequence dateCharSequence = DateFormat.format("MM/dd/yyyy", calendar1);
-                tvDate.setText(dateCharSequence);
-
-            }
-        },YEAR,MONTH,DATE);
-
-        datePickDialog.show();
-    }
-
-    private void handleBtnTime(){
-        Calendar calendar = Calendar.getInstance();
-
-        int HOUR = calendar.get(Calendar.HOUR);
-        int MINUTE = calendar.get(Calendar.MINUTE);
-
-        TimePickerDialog timePickerDialog = new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker view, int hour, int minute) {
-                String timeString = "hour:" + hour + "minute:" + minute;
-                tvTime.setText(timeString);
-
-                Calendar calendar1 = Calendar.getInstance();
-                calendar1.set(Calendar.HOUR,hour);
-                calendar1.set(Calendar.MINUTE,minute);
-
-                CharSequence timeCharSequence = DateFormat.format("hh:mm", calendar1);
-                tvTime.setText(timeCharSequence);
-            }
-        },HOUR,MINUTE, true);
-
-        timePickerDialog.show();
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
     }
 
-}
+    private void setContentView(int fragment_reservation) {
+    }
+
+    private class TimeSlotsViewHolder extends RecyclerView.ViewHolder{
+
+        private TextView tvItem;
+
+        public TimeSlotsViewHolder(@NonNull View itemView) {
+            super(itemView);
+
+            tvItem = itemView.findViewById(R.id.tvItem);
+
+            //action when the user select the item
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getContext(), "time picked", Toast.LENGTH_SHORT).show();
+
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        adapter.stopListening();;
+    }
+
+
+    @Override
+    public void onStart(){
+        super.onStart();
+        adapter.startListening();;
+    }
+
+
+
