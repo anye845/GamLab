@@ -24,7 +24,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/textView"
         android:layout_marginTop="20dp"
-        tools:ignore="SpeakableTextPresentCheck" />
+        tools:ignore="SpeakableTextPresentCheck"
+        app:textColorNormal="@color/teal_200"
+        app:textColorSelected="@color/purple_700" />
 
     <Button
         android:id="@+id/btnDate"
