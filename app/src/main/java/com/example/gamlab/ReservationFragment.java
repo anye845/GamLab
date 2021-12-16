@@ -52,6 +52,7 @@ public class ReservationFragment extends Fragment{
     private FirebaseAuth mAuth;
     private String formatted;
     private String setTime;
+    private String dateId;
 
     @Nullable
     @Override
@@ -79,7 +80,7 @@ public class ReservationFragment extends Fragment{
 //                cal.add(Calendar.DATE,1);
                 SimpleDateFormat format1 = new SimpleDateFormat("MM/dd/yyyy");
                 formatted = format1.format(cal.getTime());
-                Toast.makeText(getContext(), "success", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Selected date has changed", Toast.LENGTH_SHORT).show();
                 Log.d("Selected Date", formatted);
             }
         });
@@ -104,7 +105,9 @@ public class ReservationFragment extends Fragment{
                             @Override
                             public void onSuccess(DocumentReference documentReference) {
                                 Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
-                                Toast.makeText(getContext(), "date picked", Toast.LENGTH_SHORT).show();
+                                dateId = documentReference.getId();
+                                Log.d(TAG, "date id is " + dateId);
+                                Toast.makeText(getContext(), "date is picked", Toast.LENGTH_SHORT).show();
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
@@ -181,8 +184,8 @@ public class ReservationFragment extends Fragment{
                     mAuth = FirebaseAuth.getInstance();
                     FirebaseUser currentUser = mAuth.getCurrentUser();
 
+                    //getting time information
                     int position = getAbsoluteAdapterPosition();
-
                     switch(position){
                         case 0:
                             setTime = "12:00pm~2:00pm";
@@ -207,14 +210,19 @@ public class ReservationFragment extends Fragment{
                     //adding date to the the user collection
                     Map<String, Object> times = new HashMap<>();
                     times.put("time", setTime);
-
-                    fb.collection("users/" + currentUser.getUid() + "/reservationTime")
+                    fb.collection("users/" + currentUser.getUid() + "/reservationDate/" + dateId + "/reservationTime")
                             .add(times)
                             .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                 @Override
                                 public void onSuccess(DocumentReference documentReference) {
+                                    Log.d(TAG, "date id is  " + dateId);
                                     Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
                                     Toast.makeText(getContext(), "time picked", Toast.LENGTH_SHORT).show();
+
+                                    //goes to profile fragment
+                                    FragmentTransaction fr = getFragmentManager().beginTransaction();
+                                    fr.replace(R.id.fragment_container, new ProfileFragment());
+                                    fr.commit();
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
