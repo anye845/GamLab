@@ -45,14 +45,13 @@ import devs.mulham.horizontalcalendar.HorizontalCalendar;
 import devs.mulham.horizontalcalendar.utils.HorizontalCalendarListener;
 
 
-public class ReservationFragment extends Fragment {
+public class ReservationFragment extends Fragment{
     private RecyclerView rvTimeSlot;
     private FirebaseFirestore fb;
     private FirestoreRecyclerAdapter adapter;
     private FirebaseAuth mAuth;
     private String formatted;
-
-    private Button btnGoNext;
+    private String setTime;
 
     @Nullable
     @Override
@@ -86,9 +85,9 @@ public class ReservationFragment extends Fragment {
         });
 
         //btn to pick time
-        Button btnGoNext = (Button) view.findViewById(R.id.btnGoNext);
+        Button btnDate = (Button) view.findViewById(R.id.btnDate);
 
-        btnGoNext.setOnClickListener(new View.OnClickListener() {
+        btnDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //getting users information
@@ -99,7 +98,7 @@ public class ReservationFragment extends Fragment {
                 Map<String, Object> dates = new HashMap<>();
                 dates.put("date", formatted);
                 Log.d(TAG, "get uID:" + currentUser.getUid());
-                fb.collection("users/" + currentUser.getUid() + "/reservations")
+                fb.collection("users/" + currentUser.getUid() + "/reservationDate")
                         .add(dates)
                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                             @Override
@@ -160,6 +159,10 @@ public class ReservationFragment extends Fragment {
     private void setContentView(int fragment_reservation) {
     }
 
+
+
+
+    //getting data to display in the recycler view
     class TimeSlotsViewHolder extends RecyclerView.ViewHolder {
 
         private TextView tvItem;
@@ -173,13 +176,67 @@ public class ReservationFragment extends Fragment {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(getContext(), "time picked", Toast.LENGTH_SHORT).show();
+
+                    //getting users information
+                    mAuth = FirebaseAuth.getInstance();
+                    FirebaseUser currentUser = mAuth.getCurrentUser();
+
+                    int position = getAbsoluteAdapterPosition();
+
+                    switch(position){
+                        case 0:
+                            setTime = "12:00pm~2:00pm";
+                            break;
+                        case 1:
+                            setTime = "2:00pm~4:00pm";
+                            break;
+                        case 2:
+                            setTime = "4:00pm~6:00pm";
+                            break;
+                        case 3:
+                            setTime = "6:00pm~8:00pm";
+                            break;
+                        case 4:
+                            setTime = "8:00pm~10:00pm";
+                            break;
+                        case 5:
+                            setTime = "10:00pm~0:00am";
+                            break;
+                    }
+
+                    //adding date to the the user collection
+                    Map<String, Object> times = new HashMap<>();
+                    times.put("time", setTime);
+
+                    fb.collection("users/" + currentUser.getUid() + "/reservationTime")
+                            .add(times)
+                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                @Override
+                                public void onSuccess(DocumentReference documentReference) {
+                                    Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
+                                    Toast.makeText(getContext(), "time picked", Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w(TAG, "Error adding document", e);
+                                }
+                            });
+
 
                 }
+
             });
+
         }
 
+
+
     }
+
+
+
 
 
 

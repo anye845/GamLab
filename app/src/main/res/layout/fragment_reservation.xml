@@ -25,7 +25,7 @@
         tools:ignore="SpeakableTextPresentCheck" />
 
     <Button
-        android:id="@+id/btnGoNext"
+        android:id="@+id/btnDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/calendarView"
@@ -40,7 +40,7 @@
         android:id="@+id/rvTimeSlot"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/btnGoNext"
+        android:layout_below="@+id/btnDate"
         android:layout_marginTop="20dp"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:spanCount="2"
