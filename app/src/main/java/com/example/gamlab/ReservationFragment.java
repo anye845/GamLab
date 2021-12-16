@@ -30,6 +30,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -210,7 +211,49 @@ public class ReservationFragment extends Fragment{
                     //adding date to the the user collection
                     Map<String, Object> times = new HashMap<>();
                     times.put("time", setTime);
-                    fb.collection("users/" + currentUser.getUid() + "/" + selectedDate)
+                    DocumentReference docRef =fb.collection("users").document(selectedDate).collection(selectedDate).document("time");
+                    docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot document = task.getResult();
+                                if (document.exists()) {
+                                    Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                                    FragmentTransaction fr = getFragmentManager().beginTransaction();
+                                    fr.replace(R.id.fragment_container, new InfoFragment());
+                                    fr.commit();
+                                } else {
+                                    Log.d(TAG, "No such document");
+                                    fb.collection("users/" + currentUser.getUid() + "/" + selectedDate)
+                                            .add(times)
+                                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                                @Override
+                                                public void onSuccess(DocumentReference documentReference) {
+                                                    Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
+                                                    Toast.makeText(getContext(), "time picked", Toast.LENGTH_SHORT).show();
+
+                                                    //goes to profile fragment
+                                                    FragmentTransaction fr = getFragmentManager().beginTransaction();
+                                                    fr.replace(R.id.fragment_container, new ProfileFragment());
+                                                    fr.commit();
+                                                }
+                                            })
+                                            .addOnFailureListener(new OnFailureListener() {
+                                                @Override
+                                                public void onFailure(@NonNull Exception e) {
+                                                    Log.w(TAG, "Error adding document", e);
+                                                }
+                                            });
+
+                                }
+                            } else {
+                                Log.d(TAG, "get failed with ", task.getException());
+                            }
+                        }
+                    });
+
+
+/*                    fb.collection("users/" + currentUser.getUid() + "/" + selectedDate)
                             .add(times)
                             .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                 @Override
@@ -231,7 +274,7 @@ public class ReservationFragment extends Fragment{
                                 }
                             });
 
-
+*/
 
                 }
 
