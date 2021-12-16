@@ -52,7 +52,7 @@ public class ReservationFragment extends Fragment{
     private FirebaseAuth mAuth;
     private String formatted;
     private String setTime;
-    private String dateId;
+    private String selectedDate;
 
     @Nullable
     @Override
@@ -80,6 +80,8 @@ public class ReservationFragment extends Fragment{
 //                cal.add(Calendar.DATE,1);
                 SimpleDateFormat format1 = new SimpleDateFormat("MM/dd/yyyy");
                 formatted = format1.format(cal.getTime());
+                SimpleDateFormat format2 = new SimpleDateFormat("MMddyyyy");
+                selectedDate = format2.format(cal.getTime());
                 Toast.makeText(getContext(), "Selected date has changed", Toast.LENGTH_SHORT).show();
                 Log.d("Selected Date", formatted);
             }
@@ -99,15 +101,13 @@ public class ReservationFragment extends Fragment{
                 Map<String, Object> dates = new HashMap<>();
                 dates.put("date", formatted);
                 Log.d(TAG, "get uID:" + currentUser.getUid());
-                fb.collection("users/" + currentUser.getUid() + "/reservationDate")
+                fb.collection("users/" + currentUser.getUid() + "/" + selectedDate)
                         .add(dates)
                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                             @Override
                             public void onSuccess(DocumentReference documentReference) {
                                 Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
-                                dateId = documentReference.getId();
-                                Log.d(TAG, "date id is " + dateId);
-                                Toast.makeText(getContext(), "date is picked", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), formatted, Toast.LENGTH_SHORT).show();
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
@@ -210,12 +210,11 @@ public class ReservationFragment extends Fragment{
                     //adding date to the the user collection
                     Map<String, Object> times = new HashMap<>();
                     times.put("time", setTime);
-                    fb.collection("users/" + currentUser.getUid() + "/reservationDate/" + dateId + "/reservationTime")
+                    fb.collection("users/" + currentUser.getUid() + "/" + selectedDate)
                             .add(times)
                             .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                 @Override
                                 public void onSuccess(DocumentReference documentReference) {
-                                    Log.d(TAG, "date id is  " + dateId);
                                     Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
                                     Toast.makeText(getContext(), "time picked", Toast.LENGTH_SHORT).show();
 
@@ -231,6 +230,7 @@ public class ReservationFragment extends Fragment{
                                     Log.w(TAG, "Error adding document", e);
                                 }
                             });
+
 
 
                 }
