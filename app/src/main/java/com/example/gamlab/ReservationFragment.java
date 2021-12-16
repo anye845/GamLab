@@ -124,7 +124,7 @@ public class ReservationFragment extends Fragment {
 
 
         Query query = fb.getInstance()
-                .collection("Time");
+                .collection("TimePc1").orderBy("order");
         FirestoreRecyclerOptions<TimeSlots> options = new FirestoreRecyclerOptions.Builder<TimeSlots>()
                 .setQuery(query, TimeSlots.class)
                 .build();
