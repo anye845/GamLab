@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,6 +16,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,11 +46,13 @@ import devs.mulham.horizontalcalendar.utils.HorizontalCalendarListener;
 
 
 public class ReservationFragment extends Fragment {
-
     private RecyclerView rvTimeSlot;
     private FirebaseFirestore fb;
     private FirestoreRecyclerAdapter adapter;
     private FirebaseAuth mAuth;
+    private String formatted;
+
+    private Button btnGoNext;
 
     @Nullable
     @Override
@@ -75,12 +79,22 @@ public class ReservationFragment extends Fragment {
                 //formatting date
 //                cal.add(Calendar.DATE,1);
                 SimpleDateFormat format1 = new SimpleDateFormat("MM/dd/yyyy");
-                String formatted = format1.format(cal.getTime());
+                formatted = format1.format(cal.getTime());
+                Toast.makeText(getContext(), "success", Toast.LENGTH_SHORT).show();
                 Log.d("Selected Date", formatted);
+            }
+        });
 
+        //btn to pick time
+        Button btnGoNext = (Button) view.findViewById(R.id.btnGoNext);
+
+        btnGoNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 //getting users information
                 mAuth = FirebaseAuth.getInstance();
                 FirebaseUser currentUser = mAuth.getCurrentUser();
+
                 //adding date to the collection
                 Map<String, Object> dates = new HashMap<>();
                 dates.put("date", formatted);
@@ -91,6 +105,7 @@ public class ReservationFragment extends Fragment {
                             @Override
                             public void onSuccess(DocumentReference documentReference) {
                                 Log.d(TAG, "DocumentSnapshot written with ID: " + documentReference.getId());
+                                Toast.makeText(getContext(), "date picked", Toast.LENGTH_SHORT).show();
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
@@ -103,6 +118,7 @@ public class ReservationFragment extends Fragment {
         });
 
 
+        //getting information from firestore
         fb = FirebaseFirestore.getInstance();
         rvTimeSlot = view.findViewById(R.id.rvTimeSlot);
 
@@ -113,6 +129,7 @@ public class ReservationFragment extends Fragment {
                 .setQuery(query, TimeSlots.class)
                 .build();
 
+        //using adapter to connect the time data with recyclerView
         adapter = new FirestoreRecyclerAdapter<TimeSlots, TimeSlotsViewHolder>(options) {
             @NonNull
             @Override
@@ -143,7 +160,7 @@ public class ReservationFragment extends Fragment {
     private void setContentView(int fragment_reservation) {
     }
 
-    private class TimeSlotsViewHolder extends RecyclerView.ViewHolder {
+    class TimeSlotsViewHolder extends RecyclerView.ViewHolder {
 
         private TextView tvItem;
 
@@ -161,13 +178,15 @@ public class ReservationFragment extends Fragment {
                 }
             });
         }
+
     }
+
+
 
     @Override
     public void onStop() {
         super.onStop();
         adapter.stopListening();
-        ;
     }
 
 
@@ -175,8 +194,10 @@ public class ReservationFragment extends Fragment {
     public void onStart() {
         super.onStart();
         adapter.startListening();
-        ;
     }
+
+
+
 }
 
 
