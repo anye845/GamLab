@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/whitebackground">
 
     <TextView
         android:layout_width="wrap_content"
@@ -11,8 +12,9 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="300dp"
+        android:fontFamily="@font/audiowide"
         android:text="Address:Macdonough Hall"
-        android:textSize="30sp" />
+        android:textSize="28sp" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -20,6 +22,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="350dp"
+        android:fontFamily="@font/audiowide"
         android:text="Contact:111-111-1111"
         android:textSize="30sp" />
 
@@ -29,6 +32,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="400dp"
+        android:fontFamily="@font/audiowide"
         android:text="Discord:Example"
         android:textSize="30sp" />
 
@@ -38,8 +42,9 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="475dp"
+        android:fontFamily="@font/audiowide"
         android:text="Lost and Found"
-        android:textSize="30sp" />
+        android:textSize="23sp" />
 
     <ImageView
         android:id="@+id/imageView"
